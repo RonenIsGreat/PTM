@@ -30,20 +30,16 @@ public class BestFirstSearch extends CommonSearcher{
 			}
 			
 			List<State> successors = searchable.GetAllPossibleStates(currentState);
-			long startTime = System.currentTimeMillis();
 			
 			for (State state : successors) {
 				if(!closedSet.contains(state) && !openList.contains(state)) {
 					state.SetCameFrom(currentState);
+					state.SetCost(searchable.GetCost(state));
 					addToOpenList(state);
 				} else{
 					//System.out.println("t");
 				}
 			}
-			
-			long endTime = System.currentTimeMillis();
-			System.out.println("successors number: " + successors.size());
-			System.out.println("successors took: " + (endTime - startTime) + " miliseconds");
 		}
 		
 		// no solution found

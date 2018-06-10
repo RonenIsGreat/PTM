@@ -20,7 +20,7 @@ public abstract class State<T> implements Comparable<State>{
 	}
 	
 	public abstract void SetCameFrom(State<T> cameFrom);
-		
+			
 	public T GetState() {
 		return m_state;
 	}
@@ -32,6 +32,10 @@ public abstract class State<T> implements Comparable<State>{
 	public int GetCost() {
 		return m_cost;
 	}
+	
+	public void SetCost(int cost) {
+		m_cost = cost;
+	}
 
 	public String GetStateMove() {
 		return m_stateMove;
@@ -39,11 +43,10 @@ public abstract class State<T> implements Comparable<State>{
 	
 	@Override
 	public int compareTo(State state) {
-		return (m_cost - state.GetCost());
+		return (state.GetCost() - m_cost);
 	}
 
 	public boolean[][] GetRotatedBoardCells() {
 		return m_rotatedBoardCells;
 	}
-	
 }

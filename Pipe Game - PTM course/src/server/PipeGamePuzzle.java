@@ -130,6 +130,27 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 			return false;
 		}
 	}
+	
+	@Override
+	// Cost it higher as the length of connected pipes
+	public int GetCost(PipeGameState state) {
+		int cost = 0;
+		Pair<Integer, Integer> cellPlace;
+		ArrayList<ArrayList<Character>> board = state.GetState().GetBoard();
+		List<Pair<Integer, Integer>> checkingCellsList = new LinkedList<>();
+		checkingCellsList.add(getStartCellOfBoard(board));
+		HashSet<Pair<Integer, Integer>> checkedCellPlaces = new HashSet<>();
+		
+		while(!checkingCellsList.isEmpty()) {
+			cellPlace = checkingCellsList.get(0);
+			checkingCellsList.remove(0);
+			List<Pair<Integer, Integer>> reachableCells = getReachableCells(board, cellPlace, checkedCellPlaces);
+			checkingCellsList.addAll(reachableCells);
+			cost++;
+		}
+		
+		return cost;
+	}
 
 	private Pair<Integer, Integer> getStartCellOfBoard(ArrayList<ArrayList<Character>> board){
 		for (int column = 0; column < board.size(); column++) {
@@ -195,6 +216,10 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 	private void addNearCellIfReachable(ArrayList<ArrayList<Character>> board, Pair<Integer, Integer> cellPlace,
 			String direction, List<Pair<Integer, Integer>> reachableCells,
 			HashSet<Pair<Integer, Integer>> checkedCellPlaces) {
+		if(cellPlace == null) {
+			return;
+		}
+		
 		int cellColumn = cellPlace.getKey();
 		int cellRow = cellPlace.getValue();
 		int lastColumnIndex = board.size() - 1;

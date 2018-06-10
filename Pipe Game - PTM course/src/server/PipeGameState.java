@@ -24,18 +24,17 @@ public class PipeGameState extends State<PipeGameBoard> {
 	}
 	
 	public PipeGameState(PipeGameBoard state, boolean[][] rotatedBoardCells) {
-		super(state);		
+		super(state);
 		m_rotatedBoardCells = new boolean[rotatedBoardCells.length][];
 		
 		for(int i = 0; i < rotatedBoardCells.length; i++) {
 			m_rotatedBoardCells[i] = rotatedBoardCells[i].clone();
 		}
 	}
-	
+
 	@Override
 	public void SetCameFrom(State<PipeGameBoard> cameFrom) {
 		m_cameFrom = cameFrom;
-		m_cost = cameFrom.GetCost() + 1;
 		SetStateMove(cameFrom);
 	}
 
