@@ -42,15 +42,26 @@ public class BestFirstSearch extends CommonSearcher{
 			}
 			
 			long endTime = System.currentTimeMillis();
+			System.out.println("successors number: " + successors.size());
 			System.out.println("successors took: " + (endTime - startTime) + " miliseconds");
 		}
+		
 		// no solution found
-		return null;
+		return new Solution();
 	}
 
 	private Solution backTrace(State goalState, State startState) {
 		Solution solution = new Solution();
-		solution.SetSolutionStringLines(goalState.GetBackTraceLines(startState));
+		LinkedList<String> backTraceChangesList = new LinkedList<String>();
+		State state = goalState;
+		
+		while(!state.equals(startState)) {
+			backTraceChangesList.add(state.GetStateMove());
+			state = state.GetCameFrom();
+		}
+		
+		Collections.reverse(backTraceChangesList);
+		solution.SetSolutionStringLines(backTraceChangesList);
 		return solution;
 	}
 

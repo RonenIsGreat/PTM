@@ -3,9 +3,10 @@
  */
 package server;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -15,19 +16,29 @@ import javafx.util.Pair;
  * @author ronen
  *
  */
-public class PipeGameState extends State<PipeGameBoard, Pair<Integer, Integer>> {
-	
+public class PipeGameState extends State<PipeGameBoard> {
+		
 	public PipeGameState(PipeGameBoard state) {
 		super(state);
+		m_rotatedBoardCells = new boolean[state.GetBoard().size()][state.GetBoard().get(0).size()];
+	}
+	
+	public PipeGameState(PipeGameBoard state, boolean[][] rotatedBoardCells) {
+		super(state);		
+		m_rotatedBoardCells = new boolean[rotatedBoardCells.length][];
+		
+		for(int i = 0; i < rotatedBoardCells.length; i++) {
+			m_rotatedBoardCells[i] = rotatedBoardCells[i].clone();
+		}
 	}
 	
 	@Override
-	public void SetCameFrom(State<PipeGameBoard, Pair<Integer, Integer>> cameFrom) {
+	public void SetCameFrom(State<PipeGameBoard> cameFrom) {
 		m_cameFrom = cameFrom;
 		m_cost = cameFrom.GetCost() + 1;
 		SetStateMove(cameFrom);
 	}
-	
+
 	@Override
 	public boolean equals(Object other) {
 		if(!(other instanceof PipeGameState)) {
@@ -45,28 +56,16 @@ public class PipeGameState extends State<PipeGameBoard, Pair<Integer, Integer>> 
 		}		
 	}
 	
-	@Override
-	public List<String> GetBackTraceLines(State startState) {
-		LinkedList<Pair<Integer, Integer>> stateMovesList = new LinkedList<>();
-		stateMovesList.add(GetStateMove());
-		PipeGameState state = this;
-		
-		while(!state.equals(startState)) {
-			stateMovesList.add(state.GetStateMove());
-			state = (PipeGameState) state.GetCameFrom();
-		}
-		
-		Collections.reverse(stateMovesList);
-		return convertStateMovesToBackTraceLines(stateMovesList);
+	public boolean IsRotatedBoardCell(int column, int row) {
+		return m_rotatedBoardCells[column][row];
 	}
 	
-	private List<String> convertStateMovesToBackTraceLines(LinkedList<Pair<Integer, Integer>> stateMovesList) {
-		HashMap<Pair<Integer, Integer>, Integer> stateMovesCount = new HashMap<>(); 
-		
+	public void SetRotatedBoardCell(int column, int row) {
+		m_rotatedBoardCells[column][row] = true;
 	}
-
-	private void SetStateMove(State<PipeGameBoard, Pair<Integer, Integer>> cameFrom) {
-		Pair<Integer, Integer> stateMove = null;
+	
+	private void SetStateMove(State<PipeGameBoard> cameFrom) {
+		String stateMove = null;
 		Boolean flag = false;
 		ArrayList<ArrayList<Character>> cameFromBoard = cameFrom.GetState().GetBoard();
 		ArrayList<ArrayList<Character>> thisBoard = GetState().GetBoard();
@@ -77,7 +76,7 @@ public class PipeGameState extends State<PipeGameBoard, Pair<Integer, Integer>> 
 				char thisChar = thisBoard.get(column).get(row);
 				
 				if(cameFromChar != thisChar) {
-					stateMove = new Pair<Integer, Integer>(column, row);
+					stateMove = column + "," + row + "," + getNumberOfRotatesRight(cameFromChar, thisChar);
 					flag = true;
 				}
 			}

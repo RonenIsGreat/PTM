@@ -34,7 +34,7 @@ public class ClientHandler implements IClientHandler{
 		long startTime = System.currentTimeMillis();
 		Solution solution = getSolution(problem);
 		long endTime = System.currentTimeMillis();
-		System.out.println("Solve took: " + (endTime - startTime) + "miliseconds");
+		System.out.println("Solve took: " + (endTime - startTime) + " miliseconds");
 		sendSolution(solution, outToClient, doneStr);
 	}
 	

@@ -2,12 +2,13 @@ package server;
 
 import java.util.List;
 
-public abstract class State<T,G> implements Comparable<State>{
+public abstract class State<T> implements Comparable<State>{
 
 	private T m_state;
 	protected int m_cost;
-	protected State<T,G> m_cameFrom;
-	protected G m_stateMove;
+	protected State<T> m_cameFrom;
+	protected String m_stateMove;
+	protected boolean[][] m_rotatedBoardCells;
 	
 	/**
 	 * Ctor
@@ -18,13 +19,13 @@ public abstract class State<T,G> implements Comparable<State>{
 		m_cost = 0;
 	}
 	
-	public abstract void SetCameFrom(State<T,G> cameFrom);
+	public abstract void SetCameFrom(State<T> cameFrom);
 		
 	public T GetState() {
 		return m_state;
 	}
 	
-	public State<T,G> GetCameFrom() {
+	public State<T> GetCameFrom() {
 		return m_cameFrom;
 	}
 	
@@ -32,7 +33,7 @@ public abstract class State<T,G> implements Comparable<State>{
 		return m_cost;
 	}
 
-	public G GetStateMove() {
+	public String GetStateMove() {
 		return m_stateMove;
 	}
 	
@@ -40,6 +41,9 @@ public abstract class State<T,G> implements Comparable<State>{
 	public int compareTo(State state) {
 		return (m_cost - state.GetCost());
 	}
+
+	public boolean[][] GetRotatedBoardCells() {
+		return m_rotatedBoardCells;
+	}
 	
-	public abstract List<String> GetBackTraceLines(State startState);
 }

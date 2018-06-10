@@ -41,17 +41,30 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 			for (int row = 0; row < board.get(column).size(); row++) {
 				char boardChar = board.get(column).get(row);
 				
-				if(isRotatingPipeCell(boardChar)) {
-					PipeGameBoard newBoard = rotatePipeCell(board, column, row);
-					PipeGameState newPipeGameState = new PipeGameState(newBoard);
-					possibleStatesList.add(newPipeGameState);
+				if(isRotatingPipeCell(boardChar) && !(currentState.IsRotatedBoardCell(column, row))) {					
+					if((boardChar == '|') || (boardChar == '-')) {
+						PipeGameState newPipeGameState = new PipeGameState(rotateRightPipeCellBoard(board, column, row), currentState.GetRotatedBoardCells());
+						newPipeGameState.SetRotatedBoardCell(column, row);
+						possibleStatesList.add(newPipeGameState);
+					} else {
+						PipeGameState newPipeGameState = new PipeGameState(rotateRightPipeCellBoard(board, column, row), currentState.GetRotatedBoardCells());
+						newPipeGameState.SetRotatedBoardCell(column, row);
+						possibleStatesList.add(newPipeGameState);
+						
+						newPipeGameState = new PipeGameState(rotateRightPipeCellBoard(newPipeGameState.GetState().GetBoard(), column, row), currentState.GetRotatedBoardCells());
+						newPipeGameState.SetRotatedBoardCell(column, row);
+						possibleStatesList.add(newPipeGameState);
+						
+						newPipeGameState = new PipeGameState(rotateRightPipeCellBoard(newPipeGameState.GetState().GetBoard(), column, row), currentState.GetRotatedBoardCells());
+						newPipeGameState.SetRotatedBoardCell(column, row);
+						possibleStatesList.add(newPipeGameState);
+					}
 				}
 			}
 		}	
 		
 		return possibleStatesList;
 	}
-	
 
 	private boolean isRotatingPipeCell(char boardChar) {
 		return (boardChar == '-' || boardChar == 'J' || boardChar == '|' || boardChar == 'L'
@@ -59,7 +72,7 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 	}
 	
 
-	private PipeGameBoard rotatePipeCell(ArrayList<ArrayList<Character>> board, int column, int row) {
+	private PipeGameBoard rotateRightPipeCellBoard(ArrayList<ArrayList<Character>> board, int column, int row) {
 		ArrayList<ArrayList<Character>> oldBoardCopy = new ArrayList<ArrayList<Character>>(board);
 		oldBoardCopy.set(column,  new ArrayList<Character>(board.get(column)));
 		PipeGameBoard newRotatedBoard = new PipeGameBoard();
