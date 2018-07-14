@@ -36,8 +36,6 @@ public class BestFirstSearch extends CommonSearcher{
 					state.SetCameFrom(currentState);
 					state.SetCost(searchable.GetCost(state));
 					addToOpenList(state);
-				} else{
-					//System.out.println("t");
 				}
 			}
 		}

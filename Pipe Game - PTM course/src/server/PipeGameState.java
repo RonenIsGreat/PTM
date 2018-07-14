@@ -3,13 +3,7 @@
  */
 package server;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
 import javafx.util.Pair;
 
 /**
@@ -17,6 +11,8 @@ import javafx.util.Pair;
  *
  */
 public class PipeGameState extends State<PipeGameBoard> {
+	
+	protected Pair<Integer, Integer> m_ConnectedTo;
 		
 	public PipeGameState(PipeGameBoard state) {
 		super(state);
@@ -53,6 +49,20 @@ public class PipeGameState extends State<PipeGameBoard> {
 		}else {
 			return false;
 		}		
+	}
+	
+	public Pair<Integer, Integer> GetRotatedCellPosition() {
+		Pair<Integer, Integer> RotatedCellPosition;
+		
+		if(m_stateMove == null) {
+			RotatedCellPosition = GetState().GetStartCellPosition();
+		} else {
+			String[] splittedStateMove = m_stateMove.split(",");
+			int column = Integer.parseInt(splittedStateMove[0]);
+			int row = Integer.parseInt(splittedStateMove[1]);
+			RotatedCellPosition = new Pair<>(column, row);
+		}
+		return RotatedCellPosition;
 	}
 	
 	public boolean IsRotatedBoardCell(int column, int row) {

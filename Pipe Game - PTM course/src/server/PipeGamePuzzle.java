@@ -106,7 +106,7 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 	@Override
 	public boolean IsGoalState(PipeGameState state) {
 		ArrayList<ArrayList<Character>> board = state.GetState().GetBoard();
-		Pair<Integer, Integer> cellPlace = getStartCellOfBoard(board);
+		Pair<Integer, Integer> cellPlace = state.GetState().GetStartCellPosition();
 		List<Pair<Integer, Integer>> checkingCellsList = new LinkedList<>();
 		checkingCellsList.add(cellPlace);
 		HashSet<Pair<Integer, Integer>> checkedCellPlaces = new HashSet<>();
@@ -132,38 +132,153 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 	}
 	
 	@Override
-	// Cost it higher as the length of connected pipes
+	// Cost it higher as the length of connected pipes, and the state can be connected to start state
 	public int GetCost(PipeGameState state) {
 		int cost = 0;
-		Pair<Integer, Integer> cellPlace;
-		ArrayList<ArrayList<Character>> board = state.GetState().GetBoard();
-		List<Pair<Integer, Integer>> checkingCellsList = new LinkedList<>();
-		checkingCellsList.add(getStartCellOfBoard(board));
-		HashSet<Pair<Integer, Integer>> checkedCellPlaces = new HashSet<>();
-		
-		while(!checkingCellsList.isEmpty()) {
-			cellPlace = checkingCellsList.get(0);
-			checkingCellsList.remove(0);
-			List<Pair<Integer, Integer>> reachableCells = getReachableCells(board, cellPlace, checkedCellPlaces);
-			checkingCellsList.addAll(reachableCells);
-			cost++;
+		List<Pair<Integer, Integer>> connectedPipes = getConnectedPipesFromStart(state);
+
+		if(canBeConnectedToStartState(state, connectedPipes)) {
+			cost =  connectedPipes.size();
 		}
 		
 		return cost;
 	}
-
-	private Pair<Integer, Integer> getStartCellOfBoard(ArrayList<ArrayList<Character>> board){
-		for (int column = 0; column < board.size(); column++) {
-			for (int row = 0; row < board.get(column).size(); row++) {
-				char boardChar = board.get(column).get(row);
+	
+	private boolean canBeConnectedToStartState(PipeGameState state, List<Pair<Integer, Integer>> connectedPipes) {
+		boolean canBeConnectedToLastState = false;
+		//PipeGameState priviousState = (PipeGameState) state.GetCameFrom();
+		Pair<Integer, Integer> currentRotatedCell = state.GetRotatedCellPosition();
+		//Pair<Integer, Integer> lastStateRotatedCell = priviousState.GetRotatedCellPosition();
+		char currentRotatedCellChar = getCellValue(state.GetState().GetBoard(), currentRotatedCell);
+		//char lastStateRotatedCellChar = getCellValue(priviousState.GetState().GetBoard(), lastStateRotatedCell);
+		PipeGameBoard currentPipeGameBoard = state.GetState();
+		
+		
+		// Check if there are near connected to start pipe cells
+		List<Pair<Integer, Integer>> nearConnectedToStartPipes = getNearConnectedToStartPipes(connectedPipes, currentRotatedCell);
+		
+		if(nearConnectedToStartPipes.isEmpty()) {
+			return false;
+		}
+		
+		for (Pair<Integer, Integer> nearConnectedToStartPipeCell : nearConnectedToStartPipes) {
+			char nearCellChar = getCellValue(currentPipeGameBoard.GetBoard(), nearConnectedToStartPipeCell);
+			
+			if(nearCellChar == 's') {
+				canBeConnectedToLastState = true;
+			}else {
+				List<Pair<Integer, Integer>> connectedToNearPipeAndStartPipes = getNearConnectedToStartPipes(connectedPipes,
+																									nearConnectedToStartPipeCell);
 				
-				if(boardChar == 's') {
-					return new Pair<>(column, row);
+				for (Pair<Integer, Integer> connectedToNearPipeCell : connectedToNearPipeAndStartPipes) {
+					char connectedToNearCellChar = getCellValue(currentPipeGameBoard.GetBoard(), connectedToNearPipeCell);
+					char[] possibleConnectionStatesOfLastRotatedCell = getPossibleConnectionStatesOfPipeCell(nearConnectedToStartPipeCell,
+							connectedToNearPipeCell, nearCellChar, connectedToNearCellChar);
+					
+					for (char stateOfLastRotatedCell : possibleConnectionStatesOfLastRotatedCell) {
+						char[] possibleConnectionStatesOfCurrentRotatedCell = getPossibleConnectionStatesOfPipeCell(currentRotatedCell,
+								nearConnectedToStartPipeCell, currentRotatedCellChar, stateOfLastRotatedCell);
+						
+						if(possibleConnectionStatesOfCurrentRotatedCell != null) {
+							return true;
+						}
+					}
 				}
 			}
-		}	
+		}
 		
-		return null;
+		return canBeConnectedToLastState;
+	}
+
+	private List<Pair<Integer, Integer>> getNearConnectedToStartPipes(List<Pair<Integer, Integer>> connectedPipes,
+			Pair<Integer, Integer> currentRotatedCell) {
+		List<Pair<Integer, Integer>> nearConnectedToStartPipes = new LinkedList<>();
+		Pair<Integer, Integer> upperCell = new Pair<>(currentRotatedCell.getKey() - 1, currentRotatedCell.getValue());
+		Pair<Integer, Integer> belowCell = new Pair<>(currentRotatedCell.getKey() + 1, currentRotatedCell.getValue());
+		Pair<Integer, Integer> leftCell = new Pair<>(currentRotatedCell.getKey(), currentRotatedCell.getValue() - 1);
+		Pair<Integer, Integer> rightCell = new Pair<>(currentRotatedCell.getKey(), currentRotatedCell.getValue() + 1);
+		
+		for (Pair<Integer, Integer> pipeCell : connectedPipes) {
+			if(compareCells(pipeCell, upperCell) || compareCells(pipeCell, belowCell) ||
+					compareCells(pipeCell, leftCell) || compareCells(pipeCell, rightCell)) {
+				nearConnectedToStartPipes.add(pipeCell);
+			}
+		}
+		
+		return nearConnectedToStartPipes;
+	}
+
+	private char[] getPossibleConnectionStatesOfPipeCell(Pair<Integer, Integer> rotatingPipeCell,
+					Pair<Integer, Integer> fixedPipeCell, char rotatingPipeCellChar, char fixedPipeCellChar) {
+		char[] possibleConnectionStatesOfPipeCell = "".toCharArray();
+		int columnDif = rotatingPipeCell.getKey() - fixedPipeCell.getKey();
+		int rowDif = rotatingPipeCell.getValue() - fixedPipeCell.getValue();
+		
+		if(columnDif == 1 && rowDif == 0) {
+			if(fixedPipeCellChar == 's' || fixedPipeCellChar == '|' || fixedPipeCellChar == 'F' || fixedPipeCellChar == '7') {
+				if(rotatingPipeCellChar == '-' || rotatingPipeCellChar == '|') {
+					possibleConnectionStatesOfPipeCell = "|".toCharArray();
+				}else {
+					possibleConnectionStatesOfPipeCell = "JL".toCharArray();
+				}
+			}
+		}else if(columnDif == -1 && rowDif == 0) {
+			if(fixedPipeCellChar == 's' || fixedPipeCellChar == '|' || fixedPipeCellChar == 'J' || fixedPipeCellChar == 'L') {
+				if(rotatingPipeCellChar == '-' || rotatingPipeCellChar == '|') {
+					possibleConnectionStatesOfPipeCell = "|".toCharArray();
+				}else {
+					possibleConnectionStatesOfPipeCell = "F7".toCharArray();
+				}
+			}
+		}else if(columnDif == 0 && rowDif == 1) {
+			if(fixedPipeCellChar == 's' || fixedPipeCellChar == '-' || fixedPipeCellChar == 'F' || fixedPipeCellChar == 'L') {
+				if(rotatingPipeCellChar == '-' || rotatingPipeCellChar == '|') {
+					possibleConnectionStatesOfPipeCell = "-".toCharArray();
+				}else {
+					possibleConnectionStatesOfPipeCell = "J7".toCharArray();
+				}
+			}
+		}else if(columnDif == 0 && rowDif == -1) {
+			if(fixedPipeCellChar == 's' || fixedPipeCellChar == '-' || fixedPipeCellChar == 'J' || fixedPipeCellChar == '7') {
+				if(rotatingPipeCellChar == '-' || rotatingPipeCellChar == '|') {
+					possibleConnectionStatesOfPipeCell = "-".toCharArray();
+				}else {
+					possibleConnectionStatesOfPipeCell = "FL".toCharArray();
+				}
+			}
+		}
+		
+		return possibleConnectionStatesOfPipeCell;
+	}
+	
+	private boolean compareCells(Pair<Integer, Integer> cell, Pair<Integer, Integer> otherCell) {
+		if((cell.getKey() == otherCell.getKey()) && (cell.getValue() == otherCell.getValue())) {
+			return true;
+		}
+		
+		return false;
+	}
+
+	private List<Pair<Integer, Integer>> getConnectedPipesFromStart(PipeGameState state) {
+		List<Pair<Integer, Integer>> connectedPipes = new LinkedList<>();
+		List<Pair<Integer, Integer>> checkingCellsList = new LinkedList<>();
+		HashSet<Pair<Integer, Integer>> checkedCellPlaces = new HashSet<>();
+		ArrayList<ArrayList<Character>> board = state.GetState().GetBoard();
+		Pair<Integer, Integer> startCellPlace = state.GetState().GetStartCellPosition();
+		checkingCellsList.add(startCellPlace);
+		connectedPipes.add(startCellPlace);
+		
+		while(!checkingCellsList.isEmpty()) {
+			Pair<Integer, Integer> cellPlace = checkingCellsList.get(0);
+			checkingCellsList.remove(0);
+			
+			List<Pair<Integer, Integer>> reachableCells = getReachableCells(board, cellPlace, checkedCellPlaces);
+			
+			checkingCellsList.addAll(reachableCells);
+			connectedPipes.addAll(reachableCells);
+		}
+		
+		return connectedPipes;
 	}
 	
 	private char getCellValue(ArrayList<ArrayList<Character>> board, Pair<Integer, Integer> cellPlace) {
