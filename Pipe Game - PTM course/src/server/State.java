@@ -1,11 +1,9 @@
 package server;
 
-import java.util.List;
-
 public abstract class State<T> implements Comparable<State>{
 
 	private T m_state;
-	protected int m_cost;
+	protected int m_priority;
 	protected State<T> m_cameFrom;
 	protected String m_stateMove;
 	protected boolean[][] m_rotatedBoardCells;
@@ -16,7 +14,7 @@ public abstract class State<T> implements Comparable<State>{
 	public State(T state) {
 		m_state = state;
 		m_cameFrom = null;
-		m_cost = 0;
+		m_priority = 0;
 	}
 	
 	public abstract void SetCameFrom(State<T> cameFrom);
@@ -29,12 +27,12 @@ public abstract class State<T> implements Comparable<State>{
 		return m_cameFrom;
 	}
 	
-	public int GetCost() {
-		return m_cost;
+	public int GetPriority() {
+		return m_priority;
 	}
 	
-	public void SetCost(int cost) {
-		m_cost = cost;
+	public void SetPriority(int cost) {
+		m_priority = cost;
 	}
 
 	public String GetStateMove() {
@@ -43,7 +41,7 @@ public abstract class State<T> implements Comparable<State>{
 	
 	@Override
 	public int compareTo(State state) {
-		return (state.GetCost() - m_cost);
+		return (state.GetPriority() - m_priority);
 	}
 
 	public boolean[][] GetRotatedBoardCells() {

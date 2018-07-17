@@ -15,15 +15,15 @@ import java.util.List;
  * @author ronen
  *
  */
-public class CacheManager implements ICacheManager{
-	
+public class CacheManager implements ICacheManager {
+
 	/**
 	 * Ctor
 	 */
 	public CacheManager() {
-		
+
 	}
-	
+
 	// Methods
 
 	@Override
@@ -31,7 +31,7 @@ public class CacheManager implements ICacheManager{
 		Solution solution = new Solution();
 		int viewHash = getHashCodeOfView(problem);
 		Path file = getPathFromHashCode(viewHash);
-				
+
 		try {
 			if (Files.exists(file)) {
 				solution.SetSolutionStringLines(new ArrayList<String>(Files.readAllLines(file)));
@@ -39,9 +39,9 @@ public class CacheManager implements ICacheManager{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		return solution;
-	}	
+	}
 
 	@Override
 	public void SaveSolution(Solution solution, Problem problem) {
@@ -54,27 +54,27 @@ public class CacheManager implements ICacheManager{
 			e.printStackTrace();
 		}
 	}
-	
+
 	private Path getPathFromHashCode(int hashCode) {
 		final String solutionsFolder = "src\\server\\solutions";
 		final String endOfTextFile = ".txt";
 		String fileName = Integer.toString(hashCode) + endOfTextFile;
 		return Paths.get(solutionsFolder, fileName);
 	}
-	
+
 	private int getHashCodeOfView(Problem problem) {
 		StringBuilder viewString = new StringBuilder();
-		
+
 		for (String viewRow : problem.GetProblemStringLines()) {
 			viewString.append(viewRow);
 		}
-		
+
 		return viewString.toString().hashCode();
 	}
 
 	// Convert display of cells that can rotate and become the same option
 	private void convertToGenericViewString(StringBuilder viewString) {
-		for (int index=0; index < viewString.length(); index++) {
+		for (int index = 0; index < viewString.length(); index++) {
 			switch (viewString.charAt(index)) {
 			case '|':
 				viewString.setCharAt(index, '-');
@@ -91,6 +91,6 @@ public class CacheManager implements ICacheManager{
 			default:
 				break;
 			}
-		}		
+		}
 	}
 }

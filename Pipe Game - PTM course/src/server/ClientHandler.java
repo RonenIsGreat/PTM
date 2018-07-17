@@ -58,7 +58,7 @@ public class ClientHandler implements IClientHandler{
 	private Solution getSolution(Problem problem) {
 		Solution solution = m_cacheManager.GetSavedSolution(problem);
 		
-		if(solution.GetSolutionStringLines() == null) {
+		if(solution.GetSolutionStringLines().isEmpty()) {
 			solution = m_solver.GetSolution(problem, new BestFirstSearch());
 			m_cacheManager.SaveSolution(solution, problem);
 		}

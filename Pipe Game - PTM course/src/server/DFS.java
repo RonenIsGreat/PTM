@@ -3,18 +3,14 @@
  */
 package server;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
  * @author ronen
  *
  */
-public class BestFirstSearch extends CommonSearcher{
-
+public class DFS extends CommonSearcher{
 	@Override
 	public Solution Search(ISearchable searchable) {
 		addToOpenList(searchable.GetStartState());
@@ -23,6 +19,7 @@ public class BestFirstSearch extends CommonSearcher{
 		while(openList.size() > 0) {
 			State currentState = PopOpenList(); //dequeue
 			closedSet.add(currentState);
+			int priority = 0;
 			
 			if(searchable.IsGoalState(currentState)) {
 				// back trace through the parents
@@ -34,11 +31,10 @@ public class BestFirstSearch extends CommonSearcher{
 			for (State state : successors) {
 				if(!closedSet.contains(state) && !openList.contains(state)) {
 					state.SetCameFrom(currentState);
-					state.SetPriority(searchable.GetStatePriority(state));
-					
-					if(state.GetPriority() > 0) {
-						addToOpenList(state);
-					}
+					int currentStatePrio = state.GetPriority() + priority;
+					priority++;
+					state.SetPriority(priority);
+					addToOpenList(state);
 				}
 			}
 		}

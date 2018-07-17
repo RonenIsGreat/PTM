@@ -11,9 +11,7 @@ import javafx.util.Pair;
  *
  */
 public class PipeGameState extends State<PipeGameBoard> {
-	
-	protected Pair<Integer, Integer> m_ConnectedTo;
-		
+			
 	public PipeGameState(PipeGameBoard state) {
 		super(state);
 		m_rotatedBoardCells = new boolean[state.GetBoard().size()][state.GetBoard().get(0).size()];

@@ -3,6 +3,7 @@
  */
 package server;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -18,7 +19,7 @@ public class Solution {
 		 * Ctor
 		 */
 		public Solution() {
-			m_solution = null;
+			m_solution = new LinkedList<>();
 		}
 		
 		public List<String> GetSolutionStringLines() {

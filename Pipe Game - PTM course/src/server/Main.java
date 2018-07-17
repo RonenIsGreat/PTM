@@ -9,6 +9,7 @@ public class Main {
 		IClientHandler clientHandler = new ClientHandler(cacheManager, solver);
 		IServer server = new Server(port, clientHandler);
 		server.start();
+		System.out.println("Server Started. port=" + port);
 	}
 
 }

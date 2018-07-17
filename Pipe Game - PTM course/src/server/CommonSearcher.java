@@ -3,6 +3,8 @@
  */
 package server;
 
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.PriorityQueue;
 
 /**
@@ -37,5 +39,20 @@ public abstract class CommonSearcher implements ISearcher {
 	
 	protected void addToOpenList(State state) {
 		openList.add(state);
+	}
+	
+	protected Solution backTrace(State goalState, State startState) {
+		Solution solution = new Solution();
+		LinkedList<String> backTraceChangesList = new LinkedList<String>();
+		State state = goalState;
+		
+		while(!state.equals(startState)) {
+			backTraceChangesList.add(state.GetStateMove());
+			state = state.GetCameFrom();
+		}
+		
+		Collections.reverse(backTraceChangesList);
+		solution.SetSolutionStringLines(backTraceChangesList);
+		return solution;
 	}
 }

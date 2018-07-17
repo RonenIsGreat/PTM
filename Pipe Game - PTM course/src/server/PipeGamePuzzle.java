@@ -132,25 +132,22 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 	}
 	
 	@Override
-	// Cost it higher as the length of connected pipes, and the state can be connected to start state
-	public int GetCost(PipeGameState state) {
-		int cost = 0;
+	// Priority it higher as the length of connected pipes, and the state can be connected to start state
+	public int GetStatePriority(PipeGameState state) {
+		int priority = 0;
 		List<Pair<Integer, Integer>> connectedPipes = getConnectedPipesFromStart(state);
 
 		if(canBeConnectedToStartState(state, connectedPipes)) {
-			cost =  connectedPipes.size();
+			priority =  connectedPipes.size();
 		}
 		
-		return cost;
+		return priority;
 	}
 	
 	private boolean canBeConnectedToStartState(PipeGameState state, List<Pair<Integer, Integer>> connectedPipes) {
 		boolean canBeConnectedToLastState = false;
-		//PipeGameState priviousState = (PipeGameState) state.GetCameFrom();
 		Pair<Integer, Integer> currentRotatedCell = state.GetRotatedCellPosition();
-		//Pair<Integer, Integer> lastStateRotatedCell = priviousState.GetRotatedCellPosition();
 		char currentRotatedCellChar = getCellValue(state.GetState().GetBoard(), currentRotatedCell);
-		//char lastStateRotatedCellChar = getCellValue(priviousState.GetState().GetBoard(), lastStateRotatedCell);
 		PipeGameBoard currentPipeGameBoard = state.GetState();
 		
 		
