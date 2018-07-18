@@ -20,7 +20,7 @@ public class PipeGameSolver implements ISolver{
 	
 	@Override
 	public Solution GetSolution(Problem problem, ISearcher searcher) {
-		PipeGameAdapter pipeGameObjectAdapter = new PipeGameAdapter(problem);
+		PipeGameBoardAdapter pipeGameObjectAdapter = new PipeGameBoardAdapter(problem);
 		PipeGamePuzzle pipeGameSearchable = new PipeGamePuzzle(pipeGameObjectAdapter);
 		return searcher.Search(pipeGameSearchable);		
 	}	

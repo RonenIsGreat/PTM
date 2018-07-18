@@ -6,7 +6,6 @@ public abstract class State<T> implements Comparable<State>{
 	protected int m_priority;
 	protected State<T> m_cameFrom;
 	protected String m_stateMove;
-	protected boolean[][] m_rotatedBoardCells;
 	
 	/**
 	 * Ctor
@@ -42,9 +41,5 @@ public abstract class State<T> implements Comparable<State>{
 	@Override
 	public int compareTo(State state) {
 		return (state.GetPriority() - m_priority);
-	}
-
-	public boolean[][] GetRotatedBoardCells() {
-		return m_rotatedBoardCells;
 	}
 }

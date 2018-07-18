@@ -42,7 +42,7 @@ public class HillClimbing extends CommonSearcher{
 							bestSuccessorsStates.add(successor);
 							maxPriority = successor.GetPriority();
 						} else if(successor.GetPriority() == maxPriority) {
-							bestSuccessorsStates.add(successor);
+							bestSuccessorsStates.add(successor); 
 						}
 					}
 				}

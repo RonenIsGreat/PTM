@@ -47,22 +47,4 @@ public class PipeGameBoard {
 		}	
 		return startCellPosition;
 	}
-	
-	public Pair<Integer, Integer> GetGoalCellPosition(){
-		boolean flag = false;
-		Pair<Integer, Integer> goalCellPosition = null;
-		
-		for (int column = 0; (column < m_board.size()) && !flag; column++) {
-			for (int row = 0; (row < m_board.get(column).size()) && !flag; row++) {
-				char c = m_board.get(column).get(row);
-				
-				if(c == 'g') {
-					goalCellPosition = new Pair<>(column, row);
-					flag = true;
-				}
-			}
-		}	
-		return goalCellPosition;
-	}
-	
 }

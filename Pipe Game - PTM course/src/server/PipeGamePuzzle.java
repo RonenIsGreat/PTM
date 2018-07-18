@@ -22,9 +22,9 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 	/**
 	 * Ctor
 	 */
-	public PipeGamePuzzle(PipeGameAdapter pipeGameObjectAdapter) {
-		PipeGameBoard board = pipeGameObjectAdapter.GetPipeGameBoard();
-		m_startState = new PipeGameState(board);
+	public PipeGamePuzzle(PipeGameBoardAdapter pipeGameObjectAdapter) {
+		//PipeGameBoard board = pipeGameObjectAdapter.GetPipeGameBoard();
+		m_startState = new PipeGameState(pipeGameObjectAdapter);
 	}
 
 	@Override
@@ -35,27 +35,27 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 	@Override
 	public List<PipeGameState> GetAllPossibleStates(PipeGameState currentState) {
 		List<PipeGameState> possibleStatesList = new LinkedList<PipeGameState>();
-		ArrayList<ArrayList<Character>> board = currentState.GetState().GetBoard();
+		PipeGameBoardAdapter boardAdapter = currentState.GetState();
 		
-		for (int column = 0; column < board.size(); column++) {
-			for (int row = 0; row < board.get(column).size(); row++) {
-				char boardChar = board.get(column).get(row);
+		for (int column = 0; column < boardAdapter.GetColumnsNumber(); column++) {
+			for (int row = 0; row < boardAdapter.GetRowsNumber(); row++) {
+				char boardChar = boardAdapter.GetPipeChar(column, row);
 				
 				if(isRotatingPipeCell(boardChar) && !(currentState.IsRotatedBoardCell(column, row))) {					
 					if((boardChar == '|') || (boardChar == '-')) {
-						PipeGameState newPipeGameState = new PipeGameState(rotateRightPipeCellBoard(board, column, row), currentState.GetRotatedBoardCells());
+						PipeGameState newPipeGameState = new PipeGameState(rotatedRightPipeCellBoardAdapter(boardAdapter, column, row), currentState.GetRotatedBoardCells());
 						newPipeGameState.SetRotatedBoardCell(column, row);
 						possibleStatesList.add(newPipeGameState);
 					} else {
-						PipeGameState newPipeGameState = new PipeGameState(rotateRightPipeCellBoard(board, column, row), currentState.GetRotatedBoardCells());
+						PipeGameState newPipeGameState = new PipeGameState(rotatedRightPipeCellBoardAdapter(boardAdapter, column, row), currentState.GetRotatedBoardCells());
 						newPipeGameState.SetRotatedBoardCell(column, row);
 						possibleStatesList.add(newPipeGameState);
 						
-						newPipeGameState = new PipeGameState(rotateRightPipeCellBoard(newPipeGameState.GetState().GetBoard(), column, row), currentState.GetRotatedBoardCells());
+						newPipeGameState = new PipeGameState(rotatedRightPipeCellBoardAdapter(newPipeGameState.GetState(), column, row), currentState.GetRotatedBoardCells());
 						newPipeGameState.SetRotatedBoardCell(column, row);
 						possibleStatesList.add(newPipeGameState);
 						
-						newPipeGameState = new PipeGameState(rotateRightPipeCellBoard(newPipeGameState.GetState().GetBoard(), column, row), currentState.GetRotatedBoardCells());
+						newPipeGameState = new PipeGameState(rotatedRightPipeCellBoardAdapter(newPipeGameState.GetState(), column, row), currentState.GetRotatedBoardCells());
 						newPipeGameState.SetRotatedBoardCell(column, row);
 						possibleStatesList.add(newPipeGameState);
 					}
@@ -72,63 +72,59 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 	}
 	
 
-	private PipeGameBoard rotateRightPipeCellBoard(ArrayList<ArrayList<Character>> board, int column, int row) {
-		ArrayList<ArrayList<Character>> oldBoardCopy = new ArrayList<ArrayList<Character>>(board);
-		oldBoardCopy.set(column,  new ArrayList<Character>(board.get(column)));
-		PipeGameBoard newRotatedBoard = new PipeGameBoard();
-		newRotatedBoard.SetBoard(oldBoardCopy);
-		char boardChar = newRotatedBoard.GetBoard().get(column).get(row);
+	private PipeGameBoardAdapter rotatedRightPipeCellBoardAdapter(PipeGameBoardAdapter boardAdapter, int column, int row) {
+		PipeGameBoardAdapter newPipeGameAdapter = new PipeGameBoardAdapter(boardAdapter);
+		char boardChar = newPipeGameAdapter.GetPipeChar(column, row);
 
 		switch (boardChar) {
 		case '-':
-			newRotatedBoard.GetBoard().get(column).set(row, '|');
+			newPipeGameAdapter.SetPipeCellChar(column, row, '|');
 			break;
 		case 'J':
-			newRotatedBoard.GetBoard().get(column).set(row, 'L');
+			newPipeGameAdapter.SetPipeCellChar(column, row, 'L');
 			break;
 		case '|':
-			newRotatedBoard.GetBoard().get(column).set(row, '-');
+			newPipeGameAdapter.SetPipeCellChar(column, row, '-');
 			break;
 		case 'L':
-			newRotatedBoard.GetBoard().get(column).set(row, 'F');
+			newPipeGameAdapter.SetPipeCellChar(column, row, 'F');
 			break;
 		case 'F':
-			newRotatedBoard.GetBoard().get(column).set(row, '7');
+			newPipeGameAdapter.SetPipeCellChar(column, row, '7');
 			break;
 		case '7':
-			newRotatedBoard.GetBoard().get(column).set(row, 'J');
+			newPipeGameAdapter.SetPipeCellChar(column, row, 'J');
 			break;
 		}
 		
-		return newRotatedBoard;
+		return newPipeGameAdapter;
 	}
 
 	@Override
 	public boolean IsGoalState(PipeGameState state) {
-		ArrayList<ArrayList<Character>> board = state.GetState().GetBoard();
+		PipeGameBoardAdapter boardAdapter = state.GetState();
 		Pair<Integer, Integer> cellPlace = state.GetState().GetStartCellPosition();
 		List<Pair<Integer, Integer>> checkingCellsList = new LinkedList<>();
-		checkingCellsList.add(cellPlace);
 		HashSet<Pair<Integer, Integer>> checkedCellPlaces = new HashSet<>();
-		boolean foundGoal = false;
 		
-		while(!checkingCellsList.isEmpty() && !foundGoal) {
+		if(cellPlace == null) {
+			return false;
+		}
+		
+		checkingCellsList.add(cellPlace);
+		
+		while(!checkingCellsList.isEmpty()) {
 			cellPlace = checkingCellsList.get(0);
 			checkingCellsList.remove(0);
-			List<Pair<Integer, Integer>> reachableCells = getReachableCells(board, cellPlace, checkedCellPlaces);
+			List<Pair<Integer, Integer>> reachableCells = getReachableCells(boardAdapter, cellPlace, checkedCellPlaces);
 			checkingCellsList.addAll(reachableCells);
 			
-			if(getCellValue(board, cellPlace) == 'g') {
-				foundGoal = true;
+			if(boardAdapter.GetPipeChar(cellPlace) == 'g') {
+				return true;
 			}
 		}
 		
-		if(getCellValue(board, cellPlace) == 'g') {
-			return true;
-		}
-		else {
-			return false;
-		}
+		return false;
 	}
 	
 	@Override
@@ -147,8 +143,8 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 	private boolean canBeConnectedToStartState(PipeGameState state, List<Pair<Integer, Integer>> connectedPipes) {
 		boolean canBeConnectedToLastState = false;
 		Pair<Integer, Integer> currentRotatedCell = state.GetRotatedCellPosition();
-		char currentRotatedCellChar = getCellValue(state.GetState().GetBoard(), currentRotatedCell);
-		PipeGameBoard currentPipeGameBoard = state.GetState();
+		char currentRotatedCellChar = state.GetState().GetPipeChar(currentRotatedCell);
+		PipeGameBoardAdapter currentPipeGameBoardAdapter = state.GetState();
 		
 		
 		// Check if there are near connected to start pipe cells
@@ -159,7 +155,7 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 		}
 		
 		for (Pair<Integer, Integer> nearConnectedToStartPipeCell : nearConnectedToStartPipes) {
-			char nearCellChar = getCellValue(currentPipeGameBoard.GetBoard(), nearConnectedToStartPipeCell);
+			char nearCellChar = currentPipeGameBoardAdapter.GetPipeChar(nearConnectedToStartPipeCell);
 			
 			if(nearCellChar == 's') {
 				canBeConnectedToLastState = true;
@@ -168,7 +164,7 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 																									nearConnectedToStartPipeCell);
 				
 				for (Pair<Integer, Integer> connectedToNearPipeCell : connectedToNearPipeAndStartPipes) {
-					char connectedToNearCellChar = getCellValue(currentPipeGameBoard.GetBoard(), connectedToNearPipeCell);
+					char connectedToNearCellChar = currentPipeGameBoardAdapter.GetPipeChar(connectedToNearPipeCell);
 					char[] possibleConnectionStatesOfLastRotatedCell = getPossibleConnectionStatesOfPipeCell(nearConnectedToStartPipeCell,
 							connectedToNearPipeCell, nearCellChar, connectedToNearCellChar);
 					
@@ -260,72 +256,69 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 		List<Pair<Integer, Integer>> connectedPipes = new LinkedList<>();
 		List<Pair<Integer, Integer>> checkingCellsList = new LinkedList<>();
 		HashSet<Pair<Integer, Integer>> checkedCellPlaces = new HashSet<>();
-		ArrayList<ArrayList<Character>> board = state.GetState().GetBoard();
+		PipeGameBoardAdapter boardAdapter = state.GetState();
 		Pair<Integer, Integer> startCellPlace = state.GetState().GetStartCellPosition();
-		checkingCellsList.add(startCellPlace);
-		connectedPipes.add(startCellPlace);
 		
-		while(!checkingCellsList.isEmpty()) {
-			Pair<Integer, Integer> cellPlace = checkingCellsList.get(0);
-			checkingCellsList.remove(0);
+		if(startCellPlace != null) {
+			checkingCellsList.add(startCellPlace);
+			connectedPipes.add(startCellPlace);
 			
-			List<Pair<Integer, Integer>> reachableCells = getReachableCells(board, cellPlace, checkedCellPlaces);
-			
-			checkingCellsList.addAll(reachableCells);
-			connectedPipes.addAll(reachableCells);
+			while(!checkingCellsList.isEmpty()) {
+				Pair<Integer, Integer> cellPlace = checkingCellsList.get(0);
+				checkingCellsList.remove(0);
+				
+				List<Pair<Integer, Integer>> reachableCells = getReachableCells(boardAdapter, cellPlace, checkedCellPlaces);
+				
+				checkingCellsList.addAll(reachableCells);
+				connectedPipes.addAll(reachableCells);
+			}
 		}
 		
 		return connectedPipes;
 	}
 	
-	private char getCellValue(ArrayList<ArrayList<Character>> board, Pair<Integer, Integer> cellPlace) {
-		int column = cellPlace.getKey();
-		int row = cellPlace.getValue();
-		return board.get(column).get(row);
-	}
-	
-	private List<Pair<Integer, Integer>> getReachableCells(ArrayList<ArrayList<Character>> board, 
+	private List<Pair<Integer, Integer>> getReachableCells(PipeGameBoardAdapter boardAdapter, 
 			Pair<Integer, Integer> cellPlace, HashSet<Pair<Integer, Integer>> checkedCellPlaces) {
 		List<Pair<Integer, Integer>> reachableCells = new LinkedList<>();
-		char cellChar = getCellValue(board, cellPlace);
+		char cellChar = boardAdapter.GetPipeChar(cellPlace);
 		
 		switch (cellChar) {
 		case 's':
-			addNearCellIfReachable(board, cellPlace, "up", reachableCells, checkedCellPlaces);
-			addNearCellIfReachable(board, cellPlace, "down", reachableCells, checkedCellPlaces);
-			addNearCellIfReachable(board, cellPlace, "left", reachableCells, checkedCellPlaces);
-			addNearCellIfReachable(board, cellPlace, "right", reachableCells, checkedCellPlaces);
+			addNearCellIfReachable(boardAdapter, cellPlace, "up", reachableCells, checkedCellPlaces);
+			addNearCellIfReachable(boardAdapter, cellPlace, "down", reachableCells, checkedCellPlaces);
+			addNearCellIfReachable(boardAdapter, cellPlace, "left", reachableCells, checkedCellPlaces);
+			addNearCellIfReachable(boardAdapter, cellPlace, "right", reachableCells, checkedCellPlaces);
 			break;
 		case '-':
-			addNearCellIfReachable(board, cellPlace, "left", reachableCells, checkedCellPlaces);
-			addNearCellIfReachable(board, cellPlace, "right", reachableCells, checkedCellPlaces);
+			addNearCellIfReachable(boardAdapter, cellPlace, "left", reachableCells, checkedCellPlaces);
+			addNearCellIfReachable(boardAdapter, cellPlace, "right", reachableCells, checkedCellPlaces);
 			break;
 		case 'J':
-			addNearCellIfReachable(board, cellPlace, "up", reachableCells, checkedCellPlaces);
-			addNearCellIfReachable(board, cellPlace, "left", reachableCells, checkedCellPlaces);
+			addNearCellIfReachable(boardAdapter, cellPlace, "up", reachableCells, checkedCellPlaces);
+			addNearCellIfReachable(boardAdapter, cellPlace, "left", reachableCells, checkedCellPlaces);
 			break;
 		case '|':
-			addNearCellIfReachable(board, cellPlace, "up", reachableCells, checkedCellPlaces);
-			addNearCellIfReachable(board, cellPlace, "down", reachableCells, checkedCellPlaces);
+			addNearCellIfReachable(boardAdapter, cellPlace, "up", reachableCells, checkedCellPlaces);
+			addNearCellIfReachable(boardAdapter, cellPlace, "down", reachableCells, checkedCellPlaces);
 			break;
 		case 'L':
-			addNearCellIfReachable(board, cellPlace, "up", reachableCells, checkedCellPlaces);
-			addNearCellIfReachable(board, cellPlace, "right", reachableCells, checkedCellPlaces);
+			addNearCellIfReachable(boardAdapter, cellPlace, "up", reachableCells, checkedCellPlaces);
+			addNearCellIfReachable(boardAdapter, cellPlace, "right", reachableCells, checkedCellPlaces);
 			break;
 		case 'F':
-			addNearCellIfReachable(board, cellPlace, "down", reachableCells, checkedCellPlaces);
-			addNearCellIfReachable(board, cellPlace, "right", reachableCells, checkedCellPlaces);
+			addNearCellIfReachable(boardAdapter, cellPlace, "down", reachableCells, checkedCellPlaces);
+			addNearCellIfReachable(boardAdapter, cellPlace, "right", reachableCells, checkedCellPlaces);
 			break;
 		case '7':			
-			addNearCellIfReachable(board, cellPlace, "left", reachableCells, checkedCellPlaces);
-			addNearCellIfReachable(board, cellPlace, "down", reachableCells, checkedCellPlaces);
+			addNearCellIfReachable(boardAdapter, cellPlace, "left", reachableCells, checkedCellPlaces);
+			addNearCellIfReachable(boardAdapter, cellPlace, "down", reachableCells, checkedCellPlaces);
 			break;
 		}
 		
 		return reachableCells;
 	}
 
-	private void addNearCellIfReachable(ArrayList<ArrayList<Character>> board, Pair<Integer, Integer> cellPlace,
+	private void addNearCellIfReachable(PipeGameBoardAdapter boardAdapter, Pair<Integer, Integer> cellPlace,
 			String direction, List<Pair<Integer, Integer>> reachableCells,
 			HashSet<Pair<Integer, Integer>> checkedCellPlaces) {
 		if(cellPlace == null) {
@@ -334,8 +327,8 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 		
 		int cellColumn = cellPlace.getKey();
 		int cellRow = cellPlace.getValue();
-		int lastColumnIndex = board.size() - 1;
-		int lastRowIndex = board.get(0).size() - 1;
+		int lastColumnIndex = boardAdapter.GetColumnsNumber() - 1;
+		int lastRowIndex = boardAdapter.GetRowsNumber() - 1;
 		
 		switch (direction) {
 		case "up":
@@ -343,7 +336,7 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 			Pair<Integer, Integer> upperCellPlace = new Pair<Integer, Integer>(cellColumn, cellRow);
 			
 			if(!checkedCellPlaces.contains(upperCellPlace) && (cellColumn >= 0)) {
-				char upperCellChar = getCellValue(board, upperCellPlace);
+				char upperCellChar = boardAdapter.GetPipeChar(upperCellPlace);
 
 				if(upperCellChar == 'g' || upperCellChar == '|' || upperCellChar == 'F' || upperCellChar == '7') {
 					checkedCellPlaces.add(upperCellPlace);
@@ -356,7 +349,7 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 			Pair<Integer, Integer> lowerCellPlace = new Pair<Integer, Integer>(cellColumn, cellRow);
 			
 			if(!checkedCellPlaces.contains(lowerCellPlace) && (cellColumn <= lastColumnIndex)) {
-				char lowerCellChar = getCellValue(board, lowerCellPlace);
+				char lowerCellChar = boardAdapter.GetPipeChar(lowerCellPlace);
 
 				if(lowerCellChar == 'g' || lowerCellChar == '|' || lowerCellChar == 'J' || lowerCellChar == 'L') {
 					checkedCellPlaces.add(lowerCellPlace);
@@ -369,7 +362,7 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 			Pair<Integer, Integer> leftCellPlace = new Pair<Integer, Integer>(cellColumn, cellRow);
 			
 			if(!checkedCellPlaces.contains(leftCellPlace) && (cellRow >= 0)) {
-				char leftCellChar = getCellValue(board, leftCellPlace);
+				char leftCellChar = boardAdapter.GetPipeChar(leftCellPlace);
 
 				if(leftCellChar == 'g' || leftCellChar == '-' || leftCellChar == 'L' || leftCellChar == 'F') {
 					checkedCellPlaces.add(leftCellPlace);
@@ -382,7 +375,7 @@ public class PipeGamePuzzle implements ISearchable<PipeGameState> {
 			Pair<Integer, Integer> rightCellPlace = new Pair<Integer, Integer>(cellColumn, cellRow);
 			
 			if(!checkedCellPlaces.contains(rightCellPlace) && (cellRow <= lastRowIndex)) {
-				char rightCellChar = getCellValue(board, rightCellPlace);
+				char rightCellChar = boardAdapter.GetPipeChar(rightCellPlace);
 
 				if(rightCellChar == 'g' || rightCellChar == '-' || rightCellChar == 'J' || rightCellChar == '7') {
 					checkedCellPlaces.add(rightCellPlace);
