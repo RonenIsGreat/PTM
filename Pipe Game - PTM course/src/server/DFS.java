@@ -34,7 +34,10 @@ public class DFS extends CommonSearcher{
 					int currentStatePrio = state.GetPriority() + priority;
 					priority++;
 					state.SetPriority(priority);
-					addToOpenList(state);
+
+					if(searchable.CalculateStatePriority(state) > 0) {
+						addToOpenList(state);
+					}
 				}
 			}
 		}

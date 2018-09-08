@@ -35,7 +35,7 @@ public class HillClimbing extends CommonSearcher{
 				for (State successor : successors) {
 					if(!closedSet.contains(successor) && !openList.contains(successor)) {
 						successor.SetCameFrom(currentState);
-						successor.SetPriority(searchable.GetStatePriority(successor));
+						successor.SetPriority(searchable.CalculateStatePriority(successor));
 						
 						if(successor.GetPriority() > maxPriority) {
 							bestSuccessorsStates.clear();

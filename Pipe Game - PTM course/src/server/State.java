@@ -17,9 +17,19 @@ public abstract class State<T> implements Comparable<State>{
 	}
 	
 	public abstract void SetCameFrom(State<T> cameFrom);
+	
+	@Override
+	public abstract boolean equals(Object other);
+	
+	@Override
+	public abstract int hashCode();
 			
 	public T GetState() {
 		return m_state;
+	}
+	
+	public void SetState(T state) {
+		m_state = state;
 	}
 	
 	public State<T> GetCameFrom() {

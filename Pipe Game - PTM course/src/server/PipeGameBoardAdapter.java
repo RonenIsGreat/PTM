@@ -6,8 +6,6 @@ package server;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.util.Pair;
-
 /**
  * @author ronen
  *
@@ -60,7 +58,7 @@ public class PipeGameBoardAdapter {
 		}	
 	}
 	
-	public Pair<Integer, Integer> GetStartCellPosition() {
+	public Location GetStartCellPosition() {
 		return m_pipeGameBoard.GetStartCellPosition();
 	}
 	
@@ -68,18 +66,18 @@ public class PipeGameBoardAdapter {
 		return m_pipeGameBoard.GetBoard().get(column).get(row);
 	}
 	
-	public char GetPipeChar(Pair<Integer, Integer> cell) {
-		return m_pipeGameBoard.GetBoard().get(cell.getKey()).get(cell.getValue());
+	public char GetPipeChar(Location cell) {
+		return m_pipeGameBoard.GetBoard().get(cell.col).get(cell.row);
 	}
 	
-	public Pair<Integer, Integer> GetRotatedCell(PipeGameBoardAdapter cameFromAdapter) {
+	public Location GetRotatedCell(PipeGameBoardAdapter cameFromAdapter) {
 		for (int column = 0; column < GetColumnsNumber(); column++) {
 			for (int row = 0; row < GetRowsNumber(); row++) {
 				char cameFromChar = cameFromAdapter.GetPipeChar(column, row);
 				char thisChar = this.GetPipeChar(column, row);
 				
 				if(cameFromChar != thisChar) {
-					Pair<Integer, Integer> rotatedCell = new Pair<>(column, row);
+					Location rotatedCell = new Location(column, row);
 					return rotatedCell;
 				}
 			}
@@ -88,10 +86,10 @@ public class PipeGameBoardAdapter {
 		return null;
 	}
 	
-	public int GetNumberOfRotatesRight(Pair<Integer, Integer> rotatedCell, PipeGameBoardAdapter cameFromAdapter) {
+	public int GetNumberOfRotatesRight(Location rotatedCell, PipeGameBoardAdapter cameFromAdapter) {
 		int rotatesRight;
-		char thisChar = this.GetPipeChar(rotatedCell.getKey(), rotatedCell.getValue());
-		char cameFromChar = cameFromAdapter.GetPipeChar(rotatedCell.getKey(), rotatedCell.getValue());
+		char thisChar = this.GetPipeChar(rotatedCell.col, rotatedCell.row);
+		char cameFromChar = cameFromAdapter.GetPipeChar(rotatedCell.col, rotatedCell.row);
 		
 		if(thisChar == '|' || thisChar == '-') {
 			rotatesRight = 1;
@@ -151,5 +149,10 @@ public class PipeGameBoardAdapter {
 		}
 			
 		return charArray;
+	}
+	
+	@Override
+	public int hashCode() {
+		return m_pipeGameBoard.hashCode();
 	}
 }

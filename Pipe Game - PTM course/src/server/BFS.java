@@ -33,7 +33,10 @@ public class BFS extends CommonSearcher{
 				if(!closedSet.contains(state) && !openList.contains(state)) {
 					state.SetCameFrom(currentState);
 					state.SetPriority(priority);
-					addToOpenList(state);
+
+					if(searchable.CalculateStatePriority(state) > 0) {
+						addToOpenList(state);
+					}
 				}
 			}
 		}

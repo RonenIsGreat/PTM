@@ -5,8 +5,6 @@ package server;
 
 import java.util.ArrayList;
 
-import javafx.util.Pair;
-
 /**
  * @author ronen
  *
@@ -31,20 +29,60 @@ public class PipeGameBoard {
 		m_board = board;	
 	}
 	
-	public Pair<Integer, Integer> GetStartCellPosition(){
+	public Location GetStartCellPosition(){
 		boolean flag = false;
-		Pair<Integer, Integer> startCellPosition = null;
+		Location startCellPosition = null;
 		
 		for (int column = 0; (column < m_board.size()) && !flag; column++) {
 			for (int row = 0; (row < m_board.get(column).size()) && !flag; row++) {
 				char c = m_board.get(column).get(row);
 				
 				if(c == 's') {
-					startCellPosition = new Pair<>(column, row);
+					startCellPosition = new Location(column, row);
 					flag = true;
 				}
 			}
 		}	
 		return startCellPosition;
+	}
+	
+	@Override
+	public int hashCode() {
+		StringBuilder boardString = new StringBuilder();
+		
+		for (int column = 0; column < m_board.size(); column++) {
+			for (int row = 0; row < m_board.get(column).size(); row++) {
+				char c = m_board.get(column).get(row);
+				boardString.append(c);
+			}
+		}	
+		
+		return boardString.toString().hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		PipeGameBoard other = (PipeGameBoard) o;
+		
+		if(other.GetBoard().size() != m_board.size()) {
+			return false;
+		}
+
+		for (int column = 0; (column < m_board.size()); column++) {
+			if(other.GetBoard().get(column).size() != m_board.get(column).size()) {
+				return false;
+			}
+			
+			for (int row = 0; (row < m_board.get(column).size()); row++) {
+				char c = m_board.get(column).get(row);
+				char otherC = other.GetBoard().get(column).get(row);
+				
+				if(c != otherC) {
+					return false;
+				}
+			}
+		}	
+
+		return true;
 	}
 }

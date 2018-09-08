@@ -3,9 +3,6 @@
  */
 package server;
 
-import java.util.ArrayList;
-import javafx.util.Pair;
-
 /**
  * @author ronen
  *
@@ -44,27 +41,23 @@ public class PipeGameState extends State<PipeGameBoardAdapter> {
 		PipeGameBoardAdapter otherBoard = otherState.GetState();
 		PipeGameBoardAdapter ourBoard = this.GetState();
 		
-		if(ourBoard.equals(otherBoard)) {
-			return true;
-		}else {
-			return false;
-		}		
+		return ourBoard.equals(otherBoard);
 	}
 	
-	public Pair<Integer, Integer> GetRotatedCellPosition() {
-		Pair<Integer, Integer> RotatedCellPosition;
+	public Location GetRotatedCellPosition() {
+		Location RotatedCellPosition;
 		
 		if(m_stateMove == null) {
 			RotatedCellPosition = GetState().GetStartCellPosition();
 			
 			if(RotatedCellPosition == null) {
-				RotatedCellPosition = new Pair<>(0,0);
+				RotatedCellPosition = new Location(0,0);
 			}
 		} else {
 			String[] splittedStateMove = m_stateMove.split(",");
 			int column = Integer.parseInt(splittedStateMove[0]);
 			int row = Integer.parseInt(splittedStateMove[1]);
-			RotatedCellPosition = new Pair<>(column, row);
+			RotatedCellPosition = new Location(column, row);
 		}
 		return RotatedCellPosition;
 	}
@@ -85,13 +78,18 @@ public class PipeGameState extends State<PipeGameBoardAdapter> {
 		String stateMove = null;
 		
 		PipeGameBoardAdapter cameFromAdapter = cameFrom.GetState();
-		Pair<Integer, Integer> rotatedCell = this.GetState().GetRotatedCell(cameFromAdapter);
+		Location rotatedCell = this.GetState().GetRotatedCell(cameFromAdapter);
 		
 		if(rotatedCell != null) {
-			stateMove = rotatedCell.getKey() + "," + rotatedCell.getValue() + "," + 
+			stateMove = rotatedCell.col + "," + rotatedCell.row + "," + 
 					this.GetState().GetNumberOfRotatesRight(rotatedCell, cameFromAdapter);	
 		}
 			
 		m_stateMove = stateMove;
+	}
+
+	@Override
+	public int hashCode() {
+		return this.GetState().hashCode();
 	}
 }

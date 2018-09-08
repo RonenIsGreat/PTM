@@ -31,10 +31,7 @@ public class ClientHandler implements IClientHandler{
 	@Override
 	public void handleClient(BufferedReader inFromClient, PrintWriter outToClient, String doneStr) {
 		Problem problem = getProblem(inFromClient, doneStr);
-		long startTime = System.currentTimeMillis();
 		Solution solution = getSolution(problem);
-		long endTime = System.currentTimeMillis();
-		System.out.println("Solve took: " + (endTime - startTime) + " miliseconds");
 		sendSolution(solution, outToClient, doneStr);
 	}
 	

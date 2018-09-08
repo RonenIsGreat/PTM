@@ -34,7 +34,7 @@ public class BestFirstSearch extends CommonSearcher{
 			for (State state : successors) {
 				if(!closedSet.contains(state) && !openList.contains(state)) {
 					state.SetCameFrom(currentState);
-					state.SetPriority(searchable.GetStatePriority(state));
+					state.SetPriority(searchable.CalculateStatePriority(state));
 					
 					if(state.GetPriority() > 0) {
 						addToOpenList(state);
