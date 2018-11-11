@@ -16,7 +16,8 @@ public class RunServer {
 		ICacheManager cacheManager = new CacheManager();
 		ISolver solver = new PipeGameSolver();
 		IClientHandler clientHandler = new ClientHandler(cacheManager, solver);
-		IServer s=new Server(port, clientHandler);
+		int m = 10;
+		IServer s=new Server(port, clientHandler, m);
 		s.start();
 	}
 

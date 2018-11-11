@@ -11,7 +11,9 @@ import java.io.PrintWriter;
  *
  */
 public interface IClientHandler {
-
-	void handleClient(BufferedReader inFromClient, PrintWriter outToClient, String doneStr);
+	
+	Problem getClientProblem(BufferedReader inFromClient, String doneStr);
+	
+	void solveClientProblem(Problem problem, PrintWriter outToClient, String doneStr);
 	
 }

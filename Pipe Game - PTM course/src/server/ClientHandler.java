@@ -29,8 +29,12 @@ public class ClientHandler implements IClientHandler{
 	// Methods
 	
 	@Override
-	public void handleClient(BufferedReader inFromClient, PrintWriter outToClient, String doneStr) {
-		Problem problem = getProblem(inFromClient, doneStr);
+	public Problem getClientProblem(BufferedReader inFromClient, String doneStr) {
+		return getProblem(inFromClient, doneStr);
+	}
+
+	@Override
+	public void solveClientProblem(Problem problem, PrintWriter outToClient, String doneStr) {
 		Solution solution = getSolution(problem);
 		sendSolution(solution, outToClient, doneStr);
 	}
