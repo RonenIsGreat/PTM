@@ -47,9 +47,9 @@ public class Server implements IServer{
 	
 	@Override
 	public void start() {
-		new Thread(()->runServer()).start();
 		m_ClientPriorityQueue = new PriorityBlockingQueue<>();
 		m_threadPool = new ThreadPoolExecutor(m, m, 0L, TimeUnit.MILLISECONDS, m_ClientPriorityQueue);
+		new Thread(()->runServer()).start();
 	}
 	
 	private void runServer() {
@@ -64,10 +64,7 @@ public class Server implements IServer{
 					ClientTask newClientTask = new ClientTask(m_ClientHandler, aClient, doneStr);
 					m_threadPool.execute(newClientTask);
 				} catch (SocketTimeoutException e) {
-					/*...*/
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					/*Socket timeout*/
 				}
 			}
 		} catch (IOException e1) {
@@ -79,6 +76,7 @@ public class Server implements IServer{
 	@Override
 	public void stop() {
 		m_stop = true;
+		m_threadPool.shutdown();
 	}
 	
 	
