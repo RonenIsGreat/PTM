@@ -30,17 +30,17 @@ public class Server implements IServer{
 	private int m_port;
 	private IClientHandler m_ClientHandler;
 	BlockingQueue<Runnable> m_ClientPriorityQueue;
-	int m;
+	int m_parallelClientsNumber;
 	ExecutorService m_threadPool;
 	
 	/**
 	 * Ctor
 	 */
-	public Server(int port, IClientHandler clientHandler, int m) {
+	public Server(int port, IClientHandler clientHandler, int parallelClientsNumber) {
 		m_stop = false;
 		m_port = port;
 		m_ClientHandler = clientHandler;
-		this.m = m;
+		m_parallelClientsNumber = parallelClientsNumber;
 	}
 	
 	// Methods
@@ -48,7 +48,7 @@ public class Server implements IServer{
 	@Override
 	public void start() {
 		m_ClientPriorityQueue = new PriorityBlockingQueue<>();
-		m_threadPool = new ThreadPoolExecutor(m, m, 0L, TimeUnit.MILLISECONDS, m_ClientPriorityQueue);
+		m_threadPool = new ThreadPoolExecutor(m_parallelClientsNumber, m_parallelClientsNumber, 0L, TimeUnit.MILLISECONDS, m_ClientPriorityQueue);
 		new Thread(()->runServer()).start();
 	}
 	

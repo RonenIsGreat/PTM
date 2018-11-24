@@ -16,8 +16,8 @@ public class RunServer {
 		ICacheManager cacheManager = new CacheManager();
 		ISolver solver = new PipeGameSolver();
 		IClientHandler clientHandler = new ClientHandler(cacheManager, solver);
-		int m = 10;
-		IServer s=new Server(port, clientHandler, m);
+		int parallelClientsNumber = 10;
+		IServer s=new Server(port, clientHandler, parallelClientsNumber);
 		s.start();
 	}
 
